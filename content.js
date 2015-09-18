@@ -1,7 +1,11 @@
 /* Listen for messages */
 
 var REGEX_IMPORT = /^(import )/
+var REGEX_PACKAGE_NAME_EXCLUDING_CLASS_NAME = /(.*\.)/
 var REGEX_BASE_PACKAGE;
+// This will help us determine the line from which the actual code begins.
+var INDEX_OF_LAST_IMPORT_STATEMENT = -1;
+var arrayOfBroweseableClasses = new Array();
 chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
     /* If the received message has the expected format... */
     if (msg.text && (msg.text == "report_back")) {
@@ -10,15 +14,38 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
       REGEX_BASE_PACKAGE = new RegExp('('+packageNameFolders[0] + '\.' + packageNameFolders[1] + '\.' + packageNameFolders[2] + ')');
 
       var tableRows = $('div.blob-wrapper tr');
-      $(tableRows).each(function(){
+      $(tableRows).each(function(index){
         var sourceCodeLine = $(this).find(':nth-child(2)').text();
         if (itIsAnImportStatement(sourceCodeLine)) {
           var packageName = getPackageName(sourceCodeLine);
           if (packageBelongsToOurSourceCode(packageName)) {
-              console.log('class :' + getClassName(packageName));
+              var className = getClassName(packageName);
+              if (className !== 'R') {
+                var browseableClass = new BrowseableClass(className, packageName);
+                arrayOfBroweseableClasses.push(browseableClass);
+                console.log(browseableClass.getGithubUrl());
+              }
+          }
+
+          if (INDEX_OF_LAST_IMPORT_STATEMENT < index) {
+             INDEX_OF_LAST_IMPORT_STATEMENT = index;
           }
         }
       });
+
+      for (var i=0;i<arrayOfBroweseableClasses.length;i++) {
+        var el = $('td :contains(' +arrayOfBroweseableClasses[i].className + ')');
+        for (var j = 0; j<el.length; j++) {
+          $(el[j]).wrapInner('<a href=\"' + arrayOfBroweseableClasses[i].getGithubUrl() +'\" target=\"_blank\" />');
+          console.log($(el[j]));
+        }
+      }
+
+
+      //
+      // for (i=INDEX_OF_LAST_IMPORT_STATEMENT+1;i<tableRows.length;i++) {
+      //   console.log(tableRows[i]);
+      // }
     }
 });
 
@@ -79,4 +106,16 @@ function getClassName(packageName) {
   var elementsOfPackageName = packageName.split(".");
   var className = elementsOfPackageName[elementsOfPackageName.length-1];
   return className;
+}
+
+function BrowseableClass(className, packageName) {
+  this.className = className;
+  this.packageName = packageName;
+}
+
+BrowseableClass.prototype.getGithubUrl = function() {
+
+  var result = this.packageName.match(REGEX_PACKAGE_NAME_EXCLUDING_CLASS_NAME);
+  var packageNameWithSlashes = result[0].replace(/\./g, "\/");
+  return 'http://github.com/NewsInShorts/inshortsapp/blob/master/mobile/src/main/java/' + packageNameWithSlashes + this.className + '.java';
 }
