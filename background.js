@@ -5,7 +5,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changedInfo, tab){
     var GITHUB_URL = "github.com";
     var tabUrl = tab.url;
     if (tabUrl.indexOf(GITHUB_URL) > -1) {
-      var JAVA_SOURCE_REGEX = /^(https?):\/\/(github\.com)\/([\w]+)\/([\w]+)\/blob\/([\w]+)\/(.*)\/(src\/main\/java)\/(.*)\/([\w]+\.java)/;
+      var JAVA_SOURCE_REGEX = /^(https?):\/\/(github\.com)\/([\w]+)\/([\S]+)\/blob\/([\w]+)\/(.*)\/(src\/main\/java)\/(.*)\/([\w]+\.java)/;
       var result = tabUrl.match(JAVA_SOURCE_REGEX);
       if (result) {
         var len = result.length;

@@ -26,7 +26,7 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
 
       var packageNameFolders = msg.packageName.split(".");
 
-      REGEX_BASE_PACKAGE = new RegExp('('+packageNameFolders[0] + '\.' + packageNameFolders[1] + '\.' + packageNameFolders[2] + ')');
+      REGEX_BASE_PACKAGE = new RegExp('('+packageNameFolders[0] + '\.' + packageNameFolders[1] + ')');
 
       var tableRows = $('div.blob-wrapper tr');
       $(tableRows).each(function(index){
