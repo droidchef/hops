@@ -5,16 +5,36 @@ chrome.tabs.onUpdated.addListener(function(tabId, changedInfo, tab){
     var GITHUB_URL = "github.com";
     var tabUrl = tab.url;
     if (tabUrl.indexOf(GITHUB_URL) > -1) {
-      var JAVA_SOURCE_REGEX = /^(https?):\/\/(github\.com)\/([\w]+)\/([\w]+)\/blob\/([\w]+).*\/(src\/main\/java)\/(.*)\/([\w]+\.java)$/;
+      var JAVA_SOURCE_REGEX = /^(https?):\/\/(github\.com)\/([\w]+)\/([\w]+)\/blob\/([\w]+)\/(.*)\/(src\/main\/java)\/(.*)\/([\w]+\.java)/;
       var result = tabUrl.match(JAVA_SOURCE_REGEX);
       if (result) {
         var len = result.length;
         console.log(result);
+        var protocol = result[1]; // http or https
+        var domain = result[2]; // github.com
+        var userName = result[3]; // github username. for example: ishan1604
+        var repositoryName = result[4]; // github repo name. for example: hoppr
+        var branchName = result[5]; // current branch. for example: master
+        var modulename = result[6]; // gradle project module name. for example : mobile
+        var sourceCodeFolder = result[7]; // root folder java packages are stored. for example: src/main/java
         var className = result[len - 1];
         var packageNameWithSlashes = result[len - 2];
         var packageName = packageNameWithSlashes.replace(/\//g, ".");
         console.log("Package Name : " + packageName);
         console.log("Class Name : "  + className);
+
+
+        var messagePayload = {
+          task: "activate_class_links",
+          protocol: result[1], // http or https
+          domain: result[2], // github.com
+          userName: result[3], // github username. for example: ishan1604
+          repositoryName: result[4], // github repo name. for example: hoppr
+          branchName: result[5], // current branch. for example: master
+          modulename: result[6], // gradle project module name. for example : mobile
+          sourceCodeFolder: result[7], // root folder java packages are stored. for example: src/main/java
+          packageName: packageName
+        }
 
           /*
             https://github.com/NewsInShorts/inshortsapp/blob/master/mobile/src/main/java/com/nis/app/agents/AppAgent.java
@@ -23,7 +43,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changedInfo, tab){
             Class Name = AppAgent
 
           */
-          chrome.tabs.sendMessage(tab.id, { text: "report_back", packageName: packageName},
+          chrome.tabs.sendMessage(tab.id, messagePayload,
                                 doStuffWithDOM);
       }
 

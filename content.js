@@ -6,9 +6,24 @@ var REGEX_BASE_PACKAGE;
 // This will help us determine the line from which the actual code begins.
 var INDEX_OF_LAST_IMPORT_STATEMENT = -1;
 var arrayOfBroweseableClasses = new Array();
+var PROTOCOL;
+var DOMAIN;
+var USER_NAME;
+var REPOSITORY_NAME;
+var BRANCH;
+var MODULE_NAME; // gadle based projects have modules
+var SOURCE_FOLDER_ROOT;
 chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
     /* If the received message has the expected format... */
-    if (msg.text && (msg.text == "report_back")) {
+    if (msg.task && (msg.task == "activate_class_links")) {
+      PROTOCOL = msg.protocol;
+      DOMAIN = msg.domain;
+      USER_NAME = msg.userName;
+      REPOSITORY_NAME = msg.repositoryName;
+      BRANCH = msg.branchName;
+      MODULE_NAME = msg.modulename;
+      SOURCE_FOLDER_ROOT = msg.sourceCodeFolder;
+
       var packageNameFolders = msg.packageName.split(".");
 
       REGEX_BASE_PACKAGE = new RegExp('('+packageNameFolders[0] + '\.' + packageNameFolders[1] + '\.' + packageNameFolders[2] + ')');
@@ -41,11 +56,6 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
         }
       }
 
-
-      //
-      // for (i=INDEX_OF_LAST_IMPORT_STATEMENT+1;i<tableRows.length;i++) {
-      //   console.log(tableRows[i]);
-      // }
     }
 });
 
@@ -117,5 +127,7 @@ BrowseableClass.prototype.getGithubUrl = function() {
 
   var result = this.packageName.match(REGEX_PACKAGE_NAME_EXCLUDING_CLASS_NAME);
   var packageNameWithSlashes = result[0].replace(/\./g, "\/");
-  return 'http://github.com/NewsInShorts/inshortsapp/blob/master/mobile/src/main/java/' + packageNameWithSlashes + this.className + '.java';
+  return PROTOCOL + "://" + DOMAIN + "/" + USER_NAME + "/" + REPOSITORY_NAME +
+        "/blob/" + BRANCH + "/" + MODULE_NAME + "/" + SOURCE_FOLDER_ROOT + "/"
+        + packageNameWithSlashes + this.className + '.java';
 }
