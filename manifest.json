@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
 
-  "name": "Hoppr for Github",
+  "name": "Hops",
   "description": "This extension will help you to navigate through your java classes just like you do in your IDE.",
   "version": "0.1.0",
   "background": {
@@ -18,8 +18,7 @@
     ]
   }],
   "browser_action": {
-   "default_icon": "icon.png",
-   "default_popup": "test.html"
+   "default_icon": "icon.png"
   },
   "permissions": [
    "tabs",
