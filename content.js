@@ -138,4 +138,4 @@ BrowseableClass.prototype.getGithubUrl = function() {
         + packageNameWithSlashes + this.className + '.java';
 }
 
-var REGEX_VALID_USAGE_OF_CLASS_NAME = /^([A-Z]{1}[\S]+(\(|\.|>|\s|)/
+var REGEX_VALID_USAGE_OF_CLASS_NAME = /^(\s+)?[A-Z]{1}[\S]+(\(|\.|>|\s|)/; 
