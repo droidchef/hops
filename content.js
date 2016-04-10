@@ -13,6 +13,7 @@ var REPOSITORY_NAME;
 var BRANCH;
 var MODULE_NAME; // gadle based projects have modules
 var SOURCE_FOLDER_ROOT;
+
 chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
     /* If the received message has the expected format... */
     if (msg.task && (msg.task == "activate_class_links")) {
@@ -51,8 +52,13 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
       for (var i=0;i<arrayOfBroweseableClasses.length;i++) {
         var el = $('td :contains(' +arrayOfBroweseableClasses[i].className + ')');
         for (var j = 0; j<el.length; j++) {
-          $(el[j]).wrapInner('<a href=\"' + arrayOfBroweseableClasses[i].getGithubUrl() +'\" target=\"_blank\" />');
-          console.log($(el[j]));
+          var code = $(el[j]).text();
+          var result = code.match(REGEX_VALID_USAGE_OF_CLASS_NAME);
+          console.log(result);
+          if (result) {
+            console.log(result);
+            $(el[j]).wrapInner('<a href=\"' + arrayOfBroweseableClasses[i].getGithubUrl() +'\" target=\"_blank\" />');
+          }
         }
       }
 
@@ -131,3 +137,5 @@ BrowseableClass.prototype.getGithubUrl = function() {
         "/blob/" + BRANCH + "/" + MODULE_NAME + "/" + SOURCE_FOLDER_ROOT + "/"
         + packageNameWithSlashes + this.className + '.java';
 }
+
+var REGEX_VALID_USAGE_OF_CLASS_NAME = /^([A-Z]{1}[\S]+(\(|\.|>|\s|)/
