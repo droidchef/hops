@@ -39,7 +39,7 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
               if (className !== 'R') {
                 var browseableClass = new BrowseableClass(className, packageName);
                 arrayOfBroweseableClasses.push(browseableClass);
-                console.log(browseableClass.getGithubUrl());
+                // console.log(browseableClass.getGithubUrl());
               }
           }
 
@@ -50,14 +50,17 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
       });
 
       for (var i=0;i<arrayOfBroweseableClasses.length;i++) {
-        var el = $('td :contains(' +arrayOfBroweseableClasses[i].className + ')');
+        var el = $('td :contains(' + arrayOfBroweseableClasses[i].className + ')');
         for (var j = 0; j<el.length; j++) {
           var code = $(el[j]).text();
           var result = code.match(REGEX_VALID_USAGE_OF_CLASS_NAME);
-          console.log(result);
           if (result) {
-            console.log(result);
-            $(el[j]).wrapInner('<a href=\"' + arrayOfBroweseableClasses[i].getGithubUrl() +'\" target=\"_blank\" />');
+            if (~code.indexOf('List') || ~code.indexOf('ArrayList') || ~code.indexOf('Set') || ~code.indexOf('Iterator')) {
+              // Handle more collections stuff probably wrapped inside a fucking function.
+              $(el[j]).wrapInner('<a href=\"' + arrayOfBroweseableClasses[i].getGithubUrl() +'\" target=\"_blank\" />');
+            } else if (code.length == arrayOfBroweseableClasses[i].className.length) {
+              $(el[j]).wrapInner('<a href=\"' + arrayOfBroweseableClasses[i].getGithubUrl() +'\" target=\"_blank\" />');
+            }
           }
         }
       }
@@ -138,4 +141,4 @@ BrowseableClass.prototype.getGithubUrl = function() {
         + packageNameWithSlashes + this.className + '.java';
 }
 
-var REGEX_VALID_USAGE_OF_CLASS_NAME = /^(\s+)?[A-Z]{1}[\S]+(\(|\.|>|\s|)/; 
+var REGEX_VALID_USAGE_OF_CLASS_NAME = /^(\s+)?[A-Z]{1}[\S]+(\(|\.|>|\s|$)/;
