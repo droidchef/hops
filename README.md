@@ -2,10 +2,17 @@
 An extension for Google Chrome to browse through the code just like you'd do in your IDE.
 
 # Download
-[Chrome Store](https://chrome.google.com/webstore/detail/hops/bbcefpmcbekfkncmcpbkkmdjkkdkkogi)
+You can install the extension with just one click from the [Chrome Store](https://chrome.google.com/webstore/detail/hops/bbcefpmcbekfkncmcpbkkmdjkkdkkogi)
 
-# Demo
+# Demo Video Here
 [![Watch Demo Here](http://i.imgur.com/UjmKD6c.png)](https://www.youtube.com/watch?v=vvKiXakZxxM "Watch Demo Here")
+
+# ChangeLog
+
+**Latest - v1.0.1 : 21st April, 2016**
+
+* Now classes that contained a name of another class will not be linked. Like ```DataTableDataFragment``` will not be linked to ```DataTable``` class anymore.
+
 
 # License
 
