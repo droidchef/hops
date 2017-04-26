@@ -7,12 +7,10 @@ You can install the extension with just one click from the [Chrome Store](https:
 # Demo
 [![Demo Gif](https://media.giphy.com/media/uCEg33XWlaX8A/giphy.gif)]
 
-# ChangeLog
+# Features
 
-**Latest - v1.0.1 : 21st April, 2016**
-
-* Now classes that contained a name of another class will not be linked. Like ```DataTableDataFragment``` will not be linked to ```DataTable``` class anymore.
-
+* Click to Navigate between classes of your project.
+* Click to Navigate to Official Android SDK documentation from your code.
 
 # License
 ```
