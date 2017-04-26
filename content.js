@@ -14,6 +14,8 @@ var BRANCH;
 var MODULE_NAME; // gadle based projects have modules
 var SOURCE_FOLDER_ROOT;
 
+var ANDROID_REFERENCE_URL_BASE = "https://developer.android.com/reference/";
+
 chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
     /* If the received message has the expected format... */
     if (msg.task && (msg.task == "activate_class_links")) {
@@ -34,7 +36,7 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
         var sourceCodeLine = $(this).find(':nth-child(2)').text();
         if (itIsAnImportStatement(sourceCodeLine)) {
           var packageName = getPackageName(sourceCodeLine);
-          if (packageBelongsToOurSourceCode(packageName)) {
+          if (packageBelongsToOurSourceCode(packageName) || packageBelongsToAndroid(packageName)) {
               var className = getClassName(packageName);
               if (className !== 'R') {
                 var browseableClass = new BrowseableClass(className, packageName);
@@ -57,9 +59,9 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
           if (result) {
             if (~code.indexOf('List') || ~code.indexOf('ArrayList') || ~code.indexOf('Set') || ~code.indexOf('Iterator')) {
               // Handle more collections stuff probably wrapped inside a fucking function.
-              $(el[j]).wrapInner('<a href=\"' + arrayOfBroweseableClasses[i].getGithubUrl() +'\" target=\"_blank\" />');
+              $(el[j]).wrapInner('<a href=\"' + arrayOfBroweseableClasses[i].getLinkedUrl() +'\" target=\"_blank\" />');
             } else if (code.length == arrayOfBroweseableClasses[i].className.length) {
-              $(el[j]).wrapInner('<a href=\"' + arrayOfBroweseableClasses[i].getGithubUrl() +'\" target=\"_blank\" />');
+              $(el[j]).wrapInner('<a href=\"' + arrayOfBroweseableClasses[i].getLinkedUrl() +'\" target=\"_blank\" />');
             }
           }
         }
@@ -104,6 +106,19 @@ function packageBelongsToOurSourceCode(packageNameToBeValidated) {
 }
 
 /**
+* Checks if the package belongs to android - simply checks if it starts with "android.*"
+*/
+function packageBelongsToAndroid(packageNameToBeValidated) {
+
+  if (packageNameToBeValidated.startsWith("android.")) {
+    return true;
+  } else {
+    return false;
+  }
+
+}
+
+/**
 * Extracts the package name from the import statement of the source code.
 * @param {String} importStatement
 * @return {String} packageName
@@ -132,13 +147,18 @@ function BrowseableClass(className, packageName) {
   this.packageName = packageName;
 }
 
-BrowseableClass.prototype.getGithubUrl = function() {
+BrowseableClass.prototype.getLinkedUrl = function() {
 
-  var result = this.packageName.match(REGEX_PACKAGE_NAME_EXCLUDING_CLASS_NAME);
-  var packageNameWithSlashes = result[0].replace(/\./g, "\/");
-  return PROTOCOL + "://" + DOMAIN + "/" + USER_NAME + "/" + REPOSITORY_NAME +
-        "/blob/" + BRANCH + "/" + MODULE_NAME + "/" + SOURCE_FOLDER_ROOT + "/"
-        + packageNameWithSlashes + this.className + '.java';
+  if(packageBelongsToAndroid(this.packageName)) {
+      var packageNameWithSlashes = this.packageName.replace(/\./g, "\/");
+      return ANDROID_REFERENCE_URL_BASE+packageNameWithSlashes+".html";
+  } else if(packageBelongsToOurSourceCode(this.packageName)) {
+      var result = this.packageName.match(REGEX_PACKAGE_NAME_EXCLUDING_CLASS_NAME);
+      var packageNameWithSlashes = result[0].replace(/\./g, "\/");
+      return PROTOCOL + "://" + DOMAIN + "/" + USER_NAME + "/" + REPOSITORY_NAME +
+          "/blob/" + BRANCH + "/" + MODULE_NAME + "/" + SOURCE_FOLDER_ROOT + "/"
+          + packageNameWithSlashes + this.className + '.java';
+  }
 }
 
 var REGEX_VALID_USAGE_OF_CLASS_NAME = /^(\s+)?[A-Z]{1}[\S]+(\(|\.|>|\s|$)/;
