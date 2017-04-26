@@ -3,7 +3,7 @@
 
   "name": "Hops",
   "description": "This extension will help you to navigate through your java classes just like you do in your IDE.",
-  "version": "1.0.1",
+  "version": "1.1.1",
   "background": {
     "scripts": [
       "jquery-1.11.3.min.js",
