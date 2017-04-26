@@ -4,8 +4,8 @@ An extension for Google Chrome to browse through the code just like you'd do in 
 # Download
 You can install the extension with just one click from the [Chrome Store](https://chrome.google.com/webstore/detail/hops/bbcefpmcbekfkncmcpbkkmdjkkdkkogi)
 
-# Demo Video Here
-[![Watch Demo Here](http://i.imgur.com/UjmKD6c.png)](https://www.youtube.com/watch?v=vvKiXakZxxM "Watch Demo Here")
+# Demo
+[![Demo Gif](https://media.giphy.com/media/uCEg33XWlaX8A/giphy.gif)]
 
 # ChangeLog
 
