@@ -1,7 +1,7 @@
-chrome.tabs.onUpdated.addListener(function(tabId, changedInfo, tab){
+chrome.tabs.onUpdated.addListener(function (tabId, changedInfo, tab) {
 
   console.log('TAB ID = ' + tabId);
-  if (changedInfo.status == 'complete') {
+  if (changedInfo.status === 'complete') {
     var GITHUB_URL = "github.com";
     var tabUrl = tab.url;
     if (tabUrl.indexOf(GITHUB_URL) > -1) {
@@ -21,8 +21,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changedInfo, tab){
         var packageNameWithSlashes = result[len - 2];
         var packageName = packageNameWithSlashes.replace(/\//g, ".");
         console.log("Package Name : " + packageName);
-        console.log("Class Name : "  + className);
-
+        console.log("Class Name : " + className);
 
         var messagePayload = {
           task: "activate_class_links",
@@ -36,15 +35,14 @@ chrome.tabs.onUpdated.addListener(function(tabId, changedInfo, tab){
           packageName: packageName
         }
 
-          /*
-            https://github.com/NewsInShorts/inshortsapp/blob/master/mobile/src/main/java/com/nis/app/agents/AppAgent.java
-            Now from a URL like above extract out the current package we are in, for example
-            Package Name = com.nis.app.agents
-            Class Name = AppAgent
-
-          */
-          chrome.tabs.sendMessage(tab.id, messagePayload,
-                                doStuffWithDOM);
+        /*
+         https://github.com/NewsInShorts/inshortsapp/blob/master/mobile/src/main/java/com/nis/app/agents/AppAgent.java
+         Now from a URL like above extract out the current package we are in, for example
+         Package Name = com.nis.app.agents
+         Class Name = AppAgent
+         */
+        chrome.tabs.sendMessage(tab.id, messagePayload,
+          doStuffWithDOM);
       }
 
     }
@@ -54,16 +52,14 @@ chrome.tabs.onUpdated.addListener(function(tabId, changedInfo, tab){
 
 /* A function creator for callbacks */
 function doStuffWithDOM(dataToBeLogged) {
-    // console.log("I received the following DOM content:\n" + dataToBeLogged);
-    if (jQuery) {
-      console.log('Jquery Loaded');
-      // jQuery loaded
-      console.log(dataToBeLogged);
-
-    } else {
-      // jQuery not loaded
-      console.log('Jquery Not Loaded Yet');
-    }
-
+  // console.log("I received the following DOM content:\n" + dataToBeLogged);
+  if (jQuery) {
+    console.log('Jquery Loaded');
+    // jQuery loaded
+    console.log(dataToBeLogged);
+  } else {
+    // jQuery not loaded
+    console.log('Jquery Not Loaded Yet');
+  }
 
 }
