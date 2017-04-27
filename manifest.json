@@ -23,6 +23,11 @@
   "permissions": [
    "tabs",
    "*://*.github.com/*",
-   "background"
-   ]
+   "background",
+   "storage"
+   ],
+  "options_ui": {
+   "page": "settings.html",
+   "chrome_style": true
+  }
 }

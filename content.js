@@ -51,22 +51,31 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       }
     });
 
-    for (var i = 0; i < arrayOfBroweseableClasses.length; i++) {
-      var el = $('td :contains(' + arrayOfBroweseableClasses[i].className + ')');
-      for (var j = 0; j < el.length; j++) {
-        var code = $(el[j]).text();
-        var result = code.match(REGEX_VALID_USAGE_OF_CLASS_NAME);
-        if (result) {
-          if (~code.indexOf('List') || ~code.indexOf('ArrayList') || ~code.indexOf('Set') || ~code.indexOf('Iterator')) {
-            // Handle more collections stuff probably wrapped inside a fucking function.
-            $(el[j]).wrapInner('<a href=\"' + arrayOfBroweseableClasses[i].getLinkedUrl() + '\" target=\"_blank\" />');
-          } else if (code.length === arrayOfBroweseableClasses[i].className.length) {
-            $(el[j]).wrapInner('<a href=\"' + arrayOfBroweseableClasses[i].getLinkedUrl() + '\" target=\"_blank\" />');
+    chrome.storage.local.get({
+      newTab: true
+    }, function (r) {
+      var target = "";
+      if (r.newTab) {
+        target = "_blank";
+      }
+
+      for (var i = 0; i < arrayOfBroweseableClasses.length; i++) {
+        var el = $('td :contains(' + arrayOfBroweseableClasses[i].className + ')');
+        for (var j = 0; j < el.length; j++) {
+          var code = $(el[j]).text();
+          var result = code.match(REGEX_VALID_USAGE_OF_CLASS_NAME);
+          if (result) {
+            if (~code.indexOf('List') || ~code.indexOf('ArrayList') || ~code.indexOf('Set') || ~code.indexOf('Iterator')) {
+              // Handle more collections stuff probably wrapped inside a fucking function.
+              $(el[j]).wrapInner('<a href=\"' + arrayOfBroweseableClasses[i].getLinkedUrl() + '\" target=\"' + target + '\" />');
+            } else if (code.length === arrayOfBroweseableClasses[i].className.length) {
+              $(el[j]).wrapInner('<a href=\"' + arrayOfBroweseableClasses[i].getLinkedUrl() + '\" target=\"' + target + '\" />');
+            }
           }
         }
       }
-    }
 
+    });
   }
 });
 
