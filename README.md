@@ -1,6 +1,10 @@
 # hops
 An extension for Google Chrome to browse through the code just like you'd do in your IDE.
 
+# Featured
+
+[![Android Weekly](https://img.shields.io/badge/Android%20Weekly-%23254-blue.svg)](http://androidweekly.net/issues/issue-254)
+
 # Download
 You can install the extension with just one click from the [Chrome Store](https://chrome.google.com/webstore/detail/hops/bbcefpmcbekfkncmcpbkkmdjkkdkkogi)
 
