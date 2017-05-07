@@ -1,6 +1,7 @@
 /* Listen for messages */
 
 var REGEX_IMPORT = /^(import )/;
+var REGEX_VALID_USAGE_OF_CLASS_NAME = /^(\s+)?[A-Z][\S]+(\(|\.|>|\s|$)/;
 var REGEX_PACKAGE_NAME_EXCLUDING_CLASS_NAME = /(.*\.)/;
 var REGEX_BASE_PACKAGE;
 // This will help us determine the line from which the actual code begins.
@@ -11,12 +12,12 @@ var DOMAIN;
 var USER_NAME;
 var REPOSITORY_NAME;
 var BRANCH;
-var MODULE_NAME; // gadle based projects have modules
+var MODULE_NAME; // gradle based projects have modules
 var SOURCE_FOLDER_ROOT;
 
 var ANDROID_REFERENCE_URL_BASE = "https://developer.android.com/reference/";
 
-chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function (msg) {
   /* If the received message has the expected format... */
   if (msg.task && (msg.task === "activate_class_links")) {
     PROTOCOL = msg.protocol;
@@ -39,7 +40,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         if (packageBelongsToOurSourceCode(packageName) || packageBelongsToAndroid(packageName)) {
           var className = getClassName(packageName);
           if (className !== 'R') {
-            var browseableClass = new BrowseableClass(className, packageName);
+            var browseableClass = new BrowseableClass(className, packageName, msg.ext);
             arrayOfBroweseableClasses.push(browseableClass);
             // console.log(browseableClass.getGithubUrl());
           }
@@ -51,8 +52,11 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       }
     });
 
+    console.dir(arrayOfBroweseableClasses);
+
     for (var i = 0; i < arrayOfBroweseableClasses.length; i++) {
       var el = $('td :contains(' + arrayOfBroweseableClasses[i].className + ')');
+      console.dir(el);
       for (var j = 0; j < el.length; j++) {
         var code = $(el[j]).text();
         var result = code.match(REGEX_VALID_USAGE_OF_CLASS_NAME);
@@ -121,9 +125,10 @@ function getClassName(packageName) {
   return elementsOfPackageName[elementsOfPackageName.length - 1];
 }
 
-function BrowseableClass(className, packageName) {
+function BrowseableClass(className, packageName, ext) {
   this.className = className;
   this.packageName = packageName;
+  this.ext = ext;
 }
 
 BrowseableClass.prototype.getLinkedUrl = function () {
@@ -134,9 +139,7 @@ BrowseableClass.prototype.getLinkedUrl = function () {
     var result = this.packageName.match(REGEX_PACKAGE_NAME_EXCLUDING_CLASS_NAME);
     var packageNameWithSlashes = result[0].replace(/\./g, "\/");
     return PROTOCOL + "://" + DOMAIN + "/" + USER_NAME + "/" + REPOSITORY_NAME +
-      "/blob/" + BRANCH + "/" + MODULE_NAME + "/" + SOURCE_FOLDER_ROOT + "/"
-      + packageNameWithSlashes + this.className + '.java';
+        "/blob/" + BRANCH + "/" + MODULE_NAME + "/" + SOURCE_FOLDER_ROOT + "/"
+        + packageNameWithSlashes + this.className + "." + this.ext;
   }
 };
-
-var REGEX_VALID_USAGE_OF_CLASS_NAME = /^(\s+)?[A-Z][\S]+(\(|\.|>|\s|$)/;
