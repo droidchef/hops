@@ -55,18 +55,16 @@ chrome.runtime.onMessage.addListener(function (msg) {
         }
       }
     });
-
     for (var i = 0; i < arrayOfBroweseableClasses.length; i++) {
       var clazz = arrayOfBroweseableClasses[i];
       // Skip line number
       var el = $('td[id*=LC]' + ( msg.ext === "java" ? " " : "") + ':contains(' + clazz.className + ')');
       for (var j = 0; j < el.length; j++) {
-        var code = $(el[j]).text();
-
-        // The workaround for Kotlin highlights imports too. Skip them, both Kotlin and Java (faster loop)
-        if (code.startsWith("import ")) continue;
 
         if (msg.ext === "java") {
+          var code = $(el[j]).text();
+          if (code.startsWith("import ")) continue;
+
           var result = code.match(REGEX_VALID_USAGE_OF_CLASS_NAME);
           if (result) {
             if (~code.indexOf('List') || ~code.indexOf('ArrayList') || ~code.indexOf('Set') || ~code.indexOf('Iterator')) {
@@ -77,14 +75,20 @@ chrome.runtime.onMessage.addListener(function (msg) {
             }
           }
         } else if (msg.ext === "kt") {
+          var codeHtml = $(el[j]).html();
+          var codeText = $(el[j]).text();
+
           /*
            Workaround for Kotlin. It gets the first char of a class (first index); it checks if before the class name there's another char, if true skip this line;
            it calculates the used length, adding to the first index, the length of class name, plus a special char (like . (  <  >).
            At the end it checks if the substring matches with a valid usage of class name, so replace it with the URL
            */
-          var index = code.indexOf(clazz.className);
-          switch (code.charAt(index - 1)) {
+          var indexHtml = codeHtml.indexOf(clazz.className);
+          var indexText = codeText.indexOf(clazz.className);
+
+          switch (codeText.charAt(indexText - 1)) {
             case "<":
+            case ">":
             case " ":
             case "(":
               break;
@@ -92,11 +96,13 @@ chrome.runtime.onMessage.addListener(function (msg) {
               continue;
           }
 
-          var classUsage = index + clazz.className.length + 1;
-          var result = code.substr(index, classUsage).match(REGEX_VALID_USAGE_OF_CLASS_NAME);
+          var classUsage = indexHtml + clazz.className.length + 1;
+          if (codeHtml.charAt(classUsage - 1) >= 'A' || 'Z' <= codeHtml.charAt(classUsage - 1)) continue;
+
+          var result = codeHtml.substr(indexHtml, classUsage).match(REGEX_VALID_USAGE_OF_CLASS_NAME);
 
           if (result) {
-            $(el[j]).html(code.replaceBetween(index, classUsage - 1, '<a href=\"' + clazz.getLinkedUrl() + '\" target=\"_blank\">' + clazz.className + '</a>'));
+            $(el[j]).html(codeHtml.replaceBetween(indexHtml, classUsage - 1, '<a href=\"' + clazz.getLinkedUrl() + '\" target=\"_blank\">' + clazz.className + '</a>'));
           }
         }
       }
