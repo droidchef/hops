@@ -17,6 +17,10 @@ var SOURCE_FOLDER_ROOT;
 
 var ANDROID_REFERENCE_URL_BASE = "https://developer.android.com/reference/";
 
+String.prototype.replaceBetween = function (start, end, what) {
+  return this.substring(0, start) + what + this.substring(end);
+};
+
 chrome.runtime.onMessage.addListener(function (msg) {
   /* If the received message has the expected format... */
   if (msg.task && (msg.task === "activate_class_links")) {
@@ -52,20 +56,47 @@ chrome.runtime.onMessage.addListener(function (msg) {
       }
     });
 
-    console.dir(arrayOfBroweseableClasses);
-
     for (var i = 0; i < arrayOfBroweseableClasses.length; i++) {
-      var el = $('td :contains(' + arrayOfBroweseableClasses[i].className + ')');
-      console.dir(el);
+      var clazz = arrayOfBroweseableClasses[i];
+      // Skip line number
+      var el = $('td[id*=LC]' + ( msg.ext === "java" ? " " : "") + ':contains(' + clazz.className + ')');
       for (var j = 0; j < el.length; j++) {
         var code = $(el[j]).text();
-        var result = code.match(REGEX_VALID_USAGE_OF_CLASS_NAME);
-        if (result) {
-          if (~code.indexOf('List') || ~code.indexOf('ArrayList') || ~code.indexOf('Set') || ~code.indexOf('Iterator')) {
-            // Handle more collections stuff probably wrapped inside a fucking function.
-            $(el[j]).wrapInner('<a href=\"' + arrayOfBroweseableClasses[i].getLinkedUrl() + '\" target=\"_blank\" />');
-          } else if (code.length === arrayOfBroweseableClasses[i].className.length) {
-            $(el[j]).wrapInner('<a href=\"' + arrayOfBroweseableClasses[i].getLinkedUrl() + '\" target=\"_blank\" />');
+
+        // The workaround for Kotlin highlights imports too. Skip them, both Kotlin and Java (faster loop)
+        if (code.startsWith("import ")) continue;
+
+        if (msg.ext === "java") {
+          var result = code.match(REGEX_VALID_USAGE_OF_CLASS_NAME);
+          if (result) {
+            if (~code.indexOf('List') || ~code.indexOf('ArrayList') || ~code.indexOf('Set') || ~code.indexOf('Iterator')) {
+              // Handle more collections stuff probably wrapped inside a fucking function.
+              $(el[j]).wrapInner('<a href=\"' + clazz.getLinkedUrl() + '\" target=\"_blank\" />');
+            } else if (code.length === clazz.className.length) {
+              $(el[j]).wrapInner('<a href=\"' + clazz.getLinkedUrl() + '\" target=\"_blank\" />');
+            }
+          }
+        } else if (msg.ext === "kt") {
+          /*
+           Workaround for Kotlin. It gets the first char of a class (first index); it checks if before the class name there's another char, if true skip this line;
+           it calculates the used length, adding to the first index, the length of class name, plus a special char (like . (  <  >).
+           At the end it checks if the substring matches with a valid usage of class name, so replace it with the URL
+           */
+          var index = code.indexOf(clazz.className);
+          switch (code.charAt(index - 1)) {
+            case "<":
+            case " ":
+            case "(":
+              break;
+            default:
+              continue;
+          }
+
+          var classUsage = index + clazz.className.length + 1;
+          var result = code.substr(index, classUsage).match(REGEX_VALID_USAGE_OF_CLASS_NAME);
+
+          if (result) {
+            $(el[j]).html(code.replaceBetween(index, classUsage - 1, '<a href=\"' + clazz.getLinkedUrl() + '\" target=\"_blank\">' + clazz.className + '</a>'));
           }
         }
       }
